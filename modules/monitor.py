@@ -28,8 +28,15 @@ def get_db_size() -> dict:
         session.close()
 
 
+def is_admin() -> bool:
+    admin = st.secrets.get("app", {}).get("ADMIN_USERNAME", "")
+    return st.session_state.get("username") == admin
+
+
 def render_sidebar_monitor():
-    """Bloco de monitoramento exibido na sidebar para o usuario logado."""
+    """Bloco de monitoramento exibido na sidebar apenas para o admin."""
+    if not is_admin():
+        return
     st.sidebar.divider()
     st.sidebar.caption("Monitor de limites")
 
