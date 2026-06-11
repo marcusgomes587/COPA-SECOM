@@ -185,6 +185,32 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     padding: 2px 10px;
     border-radius: 20px;
 }
+
+/* ── Card footer (palpite salvo + countdown) ── */
+.card-footer {
+    padding: 6px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.saved-badge {
+    display: inline-block;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #bbf7d0;
+}
+
+/* ── Resultado do palpite (jogo encerrado) ── */
+.pred-result {
+    padding: 6px 16px 12px;
+    font-size: 13px;
+    color: #374151;
+}
 </style>
 """, unsafe_allow_html=True)
 
