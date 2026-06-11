@@ -70,6 +70,9 @@ with st.sidebar:
     if st.button("Sair", use_container_width=True):
         logout()
 
+from modules.monitor import render_sidebar_monitor
+render_sidebar_monitor()
+
 # --- Renderiza a pagina ativa ---
 page = st.session_state.page
 
