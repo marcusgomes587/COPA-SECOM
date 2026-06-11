@@ -3,7 +3,7 @@ import streamlit as st
 from sqlalchemy import select
 from modules.database import get_session
 from modules.models import Match, Prediction
-from modules.flags import get_flag, MATCH_GROUP
+from modules.flags import MATCH_GROUP
 from modules.scoring import calculate_points
 
 LOCK_MINUTES = 30
@@ -113,9 +113,6 @@ def _render_card(m: Match, session, user_id: str):
     label   = STATUS_LABEL.get(m.status, m.status)
     cls     = STATUS_CLASS.get(m.status, "status-ns")
 
-    hf = get_flag(m.home_team)
-    af = get_flag(m.away_team)
-
     if is_done:
         score_html = f'<div class="score-num">{m.home_score} : {m.away_score}</div>'
     elif is_live:
@@ -141,12 +138,10 @@ def _render_card(m: Match, session, user_id: str):
       </div>
       <div class="match-body">
         <div class="team-block">
-          <span class="team-flag">{hf}</span>
           <span class="team-name">{m.home_team}</span>
         </div>
         <div class="score-wrap">{score_html}</div>
         <div class="team-block away">
-          <span class="team-flag">{af}</span>
           <span class="team-name">{m.away_team}</span>
         </div>
       </div>

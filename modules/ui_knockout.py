@@ -2,7 +2,6 @@ import streamlit as st
 from sqlalchemy import select
 from modules.database import get_session
 from modules.models import Match
-from modules.flags import get_flag
 from modules.scoring import calculate_points
 
 
@@ -31,9 +30,6 @@ def _render_knockout_card(match: Match, user_id: str, session):
     from modules.scoring import calculate_points
     is_done = match.status in ("FT", "AET", "PEN")
     is_live = match.status in ("1H", "2H", "HT", "ET")
-    hf = get_flag(match.home_team)
-    af = get_flag(match.away_team)
-
     if is_done:
         score_html = f'<div class="score-num">{match.home_score} : {match.away_score}</div>'
     elif is_live:
@@ -48,12 +44,10 @@ def _render_knockout_card(match: Match, user_id: str, session):
       </div>
       <div class="match-body">
         <div class="team-block">
-          <span class="team-flag">{hf}</span>
           <span class="team-name">{match.home_team}</span>
         </div>
         <div class="score-wrap">{score_html}</div>
         <div class="team-block away">
-          <span class="team-flag">{af}</span>
           <span class="team-name">{match.away_team}</span>
         </div>
       </div>

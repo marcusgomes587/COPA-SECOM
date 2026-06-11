@@ -3,7 +3,6 @@ from sqlalchemy import select
 from modules.database import get_session
 from modules.models import Match
 from modules.scoring import update_scores_for_match
-from modules.flags import get_flag
 
 STATUS_OPTIONS = ["NS", "1H", "HT", "2H", "ET", "PEN", "FT", "AET", "SUSP"]
 
@@ -34,10 +33,8 @@ def render_admin():
     ]
 
     for m in filtered:
-        hf = get_flag(m.home_team)
-        af = get_flag(m.away_team)
         with st.expander(
-            f"{hf} {m.home_team} vs {m.away_team} {af}  —  "
+            f"{m.home_team} vs {m.away_team}  —  "
             f"{m.kickoff_time.strftime('%d/%m %H:%M')}  [{m.status}]"
         ):
             with st.form(key=f"admin_{m.match_id}"):
