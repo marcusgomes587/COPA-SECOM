@@ -1,4 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
+BRT = timezone(timedelta(hours=-3))
 import streamlit as st
 from sqlalchemy import select
 from modules.database import get_session
@@ -81,8 +83,9 @@ def render_dashboard():
         st.info("Nenhum jogo cadastrado ainda.")
         return
 
-    dates = sorted({m.kickoff_time.date() for m in matches})
-    today = datetime.now(timezone.utc).date()
+    # Filtro e exibicao em horario de Brasilia (UTC-3)
+    dates = sorted({m.kickoff_time.astimezone(BRT).date() for m in matches})
+    today = datetime.now(BRT).date()
     idx   = next((i for i, d in enumerate(dates) if d >= today), 0)
 
     selected = st.selectbox(
@@ -93,7 +96,7 @@ def render_dashboard():
         label_visibility="collapsed",
     )
 
-    day_matches = [m for m in matches if m.kickoff_time.date() == selected]
+    day_matches = [m for m in matches if m.kickoff_time.astimezone(BRT).date() == selected]
     session     = get_session()
     user_id     = st.session_state.user_id
 
@@ -133,7 +136,7 @@ def _render_card(m: Match, session, user_id: str):
     <div class="match-card">
       <div class="match-header">
         <span class="group-badge">GRUPO {group}</span>
-        <span class="match-time">{m.kickoff_time.strftime("%d/%m · %H:%M")} UTC</span>
+        <span class="match-time">{m.kickoff_time.astimezone(BRT).strftime("%d/%m · %H:%M")} (BRT)</span>
         <span class="{cls}">{label}</span>
       </div>
       <div class="match-body">
