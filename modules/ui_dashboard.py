@@ -162,8 +162,8 @@ def _render_card(m: Match, session, user_id: str):
     if is_done:
         if existing:
             pts = calculate_points(ph, pa, m.home_score or 0, m.away_score or 0)
-            labels  = {3: "Placar exato!", 1: "Acertou o vencedor", 0: "Sem pontos"}
-            cls_map = {3: "pts-3", 1: "pts-1", 0: "pts-0"}
+            labels  = {5: "Placar exato!", 3: "Acertou o vencedor", 1: "Acertou o empate", 0: "Sem pontos"}
+            cls_map = {5: "pts-5", 3: "pts-3", 1: "pts-1", 0: "pts-0"}
             st.markdown(
                 f"<div class='pred-result'>"
                 f"Seu palpite: <b>{ph} x {pa}</b>&nbsp;"

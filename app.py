@@ -128,6 +128,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     font-size: 12px;
     font-weight: 700;
 }
+.pts-5 { background: #dbeafe; color: #1d4ed8; }
 .pts-3 { background: #dcfce7; color: #15803d; }
 .pts-1 { background: #fef9c3; color: #92400e; }
 .pts-0 { background: #f3f4f6; color: #9ca3af; }

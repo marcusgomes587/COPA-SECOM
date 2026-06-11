@@ -2,7 +2,7 @@ import streamlit as st
 from sqlalchemy import select
 from modules.database import get_session
 from modules.models import Match
-from modules.scoring import update_scores_for_match
+from modules.scoring import update_scores_for_match, recalculate_all_finished
 from modules.flags import MATCH_GROUP
 
 STATUS_OPTIONS = ["NS", "1H", "HT", "2H", "ET", "PEN", "FT", "AET", "SUSP"]
@@ -17,6 +17,17 @@ ROUNDS = {
 def render_admin():
     st.header("Painel Admin — Placares")
     st.caption("Visivel apenas para o administrador.")
+
+    st.divider()
+    st.markdown("**Recalcular todos os pontos**")
+    st.caption("Use apos trocar a metodologia de pontuacao. Reprocessa todos os jogos encerrados.")
+    if st.button("Recalcular todos os palpites", type="primary", use_container_width=True):
+        try:
+            updated = recalculate_all_finished()
+            st.success(f"Recalculo concluido! {updated} palpite(s) atualizados.")
+        except Exception as e:
+            st.error(f"Erro: {e}")
+    st.divider()
 
     session = get_session()
     all_matches = session.execute(
