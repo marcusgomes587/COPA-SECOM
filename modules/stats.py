@@ -75,3 +75,17 @@ def current_phase(matches):
     if group and all(m.status in FINISHED for m in group):
         return "Mata-Mata"
     return "Fase de Grupos"
+
+
+def load_phase():
+    """Loader: fase atual do torneio a partir do banco."""
+    from sqlalchemy import select
+    from modules.database import get_session
+    from modules.models import Match
+
+    session = get_session()
+    try:
+        matches = session.execute(select(Match)).scalars().all()
+    finally:
+        session.close()
+    return current_phase(matches)

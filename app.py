@@ -212,6 +212,71 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     font-size: 13px;
     color: #374151;
 }
+
+/* ── Animacao de entrada ── */
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.match-card, .podium-card, .stats-card, .rank-row { animation: cardIn 0.35s ease both; }
+
+/* Hover so em dispositivos com mouse */
+@media (hover: none) {
+  .match-card:hover { transform: none; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+}
+
+/* ── Card de estatisticas pessoais ── */
+.stats-card {
+  display: flex; gap: 10px;
+  background: linear-gradient(135deg, #001a5e 0%, #002776 60%, #003399 100%);
+  border-radius: 16px; padding: 16px; margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(0,39,118,0.25);
+}
+.stat-box { flex: 1; text-align: center; }
+.stat-val { font-size: 22px; font-weight: 900; color: #ffdf00; }
+.stat-lbl {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: rgba(255,255,255,0.7); margin-top: 2px;
+}
+
+/* ── Linhas do ranking ── */
+.rank-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 1px solid #eaecf0; border-radius: 12px;
+  padding: 10px 14px; margin-bottom: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.rank-row.me { background: #e6f4ea; border-color: #86efac; }
+.rank-pos { width: 34px; font-size: 15px; font-weight: 900; color: #002776; text-align: center; }
+.rank-name { flex: 1; font-size: 14px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rank-pts { font-size: 16px; font-weight: 900; color: #009c3b; min-width: 64px; text-align: right; }
+.rank-meta { font-size: 11px; color: #6b7280; min-width: 110px; text-align: right; }
+.mov-up { color: #16a34a; font-size: 12px; font-weight: 900; }
+.mov-down { color: #dc2626; font-size: 12px; font-weight: 900; }
+.mov-same { color: #9ca3af; font-size: 12px; }
+.craque-badge {
+  background: linear-gradient(135deg, #ffdf00, #fbbf24);
+  color: #78350f; font-size: 10px; font-weight: 800;
+  padding: 2px 8px; border-radius: 20px; letter-spacing: 0.5px;
+}
+
+/* ── Mobile (ate 640px) ── */
+@media (max-width: 640px) {
+  .main .block-container { padding: 0.8rem 0.6rem; }
+  .copa-hero { padding: 16px 18px; border-radius: 12px; }
+  .copa-hero-title { font-size: 19px; }
+  .copa-hero-ball { font-size: 36px; }
+  .match-body { padding: 12px 10px; gap: 6px; }
+  .team-name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+  .score-wrap { min-width: 64px; padding: 8px 10px; }
+  .score-num { font-size: 20px; letter-spacing: 2px; }
+  .stats-card { padding: 12px 8px; gap: 4px; }
+  .stat-val { font-size: 17px; }
+  .rank-podium { flex-direction: column; align-items: stretch; gap: 8px; }
+  .podium-card { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; min-width: 0; }
+  .podium-card.p1 { order: -1; padding: 16px; }
+  .podium-pos { font-size: 22px; }
+  .rank-meta { display: none; }
+  .stButton > button { min-height: 44px; }
+  .stNumberInput input { min-height: 44px; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -270,11 +335,13 @@ with st.sidebar:
 render_sidebar_monitor()
 
 # Hero header
-st.markdown("""
+from modules.stats import load_phase
+phase = load_phase()
+st.markdown(f"""
 <div class="copa-hero">
   <div>
     <div class="copa-hero-title">COPA DO MUNDO 2026</div>
-    <div class="copa-hero-sub">Bolão Oficial da SECOM · Fase de Grupos</div>
+    <div class="copa-hero-sub">Bolão Oficial da SECOM · {phase}</div>
   </div>
   <div class="copa-hero-ball">🏆</div>
 </div>
