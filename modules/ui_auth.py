@@ -9,8 +9,15 @@ def render_login_page():
             text-align: center;
             padding: 2rem 0 1rem 0;
         }
-        .auth-header h1 { font-size: 2.4rem; color: #009c3b; margin: 0; }
-        .auth-header p  { color: #666; margin-top: .4rem; }
+        .auth-header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.6rem;
+            color: #ffe600;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,230,0,0.35);
+        }
+        .auth-header p  { color: #8b96ad; margin-top: .4rem; }
         </style>
         <div class="auth-header">
             <h1>COPA-SECOM 2026</h1>
