@@ -150,66 +150,64 @@ def _render_card(m: Match, session, user_id: str):
     else:
         extra = ""
 
-    st.markdown(f"""
-    <div class="match-card">
-      <div class="match-header">
-        <span class="group-badge">GRUPO {group}</span>
-        <span class="match-time">{m.kickoff_time.astimezone(BRT).strftime("%d/%m · %H:%M")} BRT</span>
-        <span class="{cls}">{label}</span>
-      </div>
-      <div class="match-body">
-        <div class="team-block">
-          {flag_img(m.home_team, 40)}<span class="team-name">{m.home_team}</span>
+    # Card unico: cabecalho, times, placar e palpite dentro da mesma moldura.
+    # O CSS :has() em app.py acha este container pela .match-header (fora de .match-card).
+    with st.container(border=True):
+        st.markdown(f"""
+        <div class="match-header">
+          <span class="group-badge">GRUPO {group}</span>
+          <span class="match-time">{m.kickoff_time.astimezone(BRT).strftime("%d/%m · %H:%M")} BRT</span>
+          <span class="{cls}">{label}</span>
         </div>
-        <div class="score-wrap">{score_html}</div>
-        <div class="team-block away">
-          {flag_img(m.away_team, 40)}<span class="team-name">{m.away_team}</span>
+        <div class="match-body">
+          <div class="team-block">
+            {flag_img(m.home_team, 40)}<span class="team-name">{m.home_team}</span>
+          </div>
+          <div class="score-wrap">{score_html}</div>
+          <div class="team-block away">
+            {flag_img(m.away_team, 40)}<span class="team-name">{m.away_team}</span>
+          </div>
         </div>
-      </div>
-      {f'<div class="card-footer">{saved_badge}{" &nbsp; " if saved_badge and extra else ""}{extra}</div>' if saved_badge or extra else ""}
-    </div>
-    """, unsafe_allow_html=True)
+        {f'<div class="card-footer">{saved_badge}{" &nbsp; " if saved_badge and extra else ""}{extra}</div>' if saved_badge or extra else ""}
+        """, unsafe_allow_html=True)
 
-    # ── Palpite integrado ao card ──
-    if is_done:
-        if existing:
-            pts = calculate_points(ph, pa, m.home_score or 0, m.away_score or 0)
-            labels  = {5: "Placar exato!", 3: "Acertou o vencedor", 1: "Acertou o empate", 0: "Sem pontos"}
-            cls_map = {5: "pts-5", 3: "pts-3", 1: "pts-1", 0: "pts-0"}
-            st.markdown(
-                f"<div class='pred-result'>"
-                f"Seu palpite: <b>{ph} x {pa}</b>&nbsp;"
-                f"<span class='pts-badge {cls_map[pts]}'>{labels[pts]} +{pts} pts</span>"
-                f"</div>",
-                unsafe_allow_html=True,
+        if is_done:
+            if existing:
+                pts = calculate_points(ph, pa, m.home_score or 0, m.away_score or 0)
+                labels  = {5: "Placar exato!", 3: "Acertou o vencedor", 1: "Acertou o empate", 0: "Sem pontos"}
+                cls_map = {5: "pts-5", 3: "pts-3", 1: "pts-1", 0: "pts-0"}
+                st.markdown(
+                    f"<div class='pred-result'>"
+                    f"Seu palpite: <b>{ph} x {pa}</b>&nbsp;"
+                    f"<span class='pts-badge {cls_map[pts]}'>{labels[pts]} +{pts} pts</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+            return
+
+        if locked:
+            return  # badge ja mostra o palpite salvo no card
+
+        # Inputs inline — dentro do card
+        c1, cx, c2, c3 = st.columns([4, 1, 4, 3])
+        with c1:
+            g_home = st.number_input(
+                m.home_team, 0, 20, ph,
+                key=f"h_{m.match_id}",
+                label_visibility="collapsed",
             )
-        return
-
-    if locked:
-        return  # badge ja mostra o palpite salvo no card
-
-    # Inputs inline — sem expander
-    c1, cx, c2, c3 = st.columns([4, 1, 4, 3])
-    with c1:
-        g_home = st.number_input(
-            m.home_team, 0, 20, ph,
-            key=f"h_{m.match_id}",
-            label_visibility="collapsed",
-        )
-    with cx:
-        st.markdown("<p style='text-align:center;padding-top:6px;font-weight:900;font-size:18px'>x</p>",
-                    unsafe_allow_html=True)
-    with c2:
-        g_away = st.number_input(
-            m.away_team, 0, 20, pa,
-            key=f"a_{m.match_id}",
-            label_visibility="collapsed",
-        )
-    with c3:
-        btn_label = "Atualizar" if existing else "Salvar"
-        if st.button(btn_label, key=f"btn_{m.match_id}",
-                     use_container_width=True, type="primary"):
-            _save_pred(user_id, m.match_id, g_home, g_away)
-            st.rerun()
-
-    st.markdown("<div style='margin-bottom:8px'></div>", unsafe_allow_html=True)
+        with cx:
+            st.markdown("<p style='text-align:center;padding-top:6px;font-weight:900;font-size:18px'>x</p>",
+                        unsafe_allow_html=True)
+        with c2:
+            g_away = st.number_input(
+                m.away_team, 0, 20, pa,
+                key=f"a_{m.match_id}",
+                label_visibility="collapsed",
+            )
+        with c3:
+            btn_label = "Atualizar" if existing else "Salvar"
+            if st.button(btn_label, key=f"btn_{m.match_id}",
+                         use_container_width=True, type="primary"):
+                _save_pred(user_id, m.match_id, g_home, g_away)
+                st.rerun()

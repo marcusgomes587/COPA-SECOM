@@ -55,25 +55,64 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 }
 
 /* ── Fundo geral ── */
-.main .block-container { max-width: 860px; padding: 1.5rem 1rem; }
+.main .block-container,
+[data-testid="stMainBlockContainer"] { max-width: 860px; padding: 1.5rem 1rem; }
 
 /* ── Botoes (area principal) ── */
-.main .stButton > button { border-radius: 12px; font-weight: 700; }
-.main .stButton > button[kind="primary"] {
+.main .stButton > button,
+[data-testid="stMain"] .stButton > button { border-radius: 12px; font-weight: 700; }
+.main .stButton > button[kind="primary"],
+[data-testid="stMain"] .stButton > button[kind="primary"] {
     background: linear-gradient(135deg, #00ff87, #00d96f);
     color: #06281a;
     border: none;
     box-shadow: 0 0 16px rgba(0,255,135,0.30);
     transition: all 0.2s;
 }
-.main .stButton > button[kind="primary"]:hover {
+.main .stButton > button[kind="primary"]:hover,
+[data-testid="stMain"] .stButton > button[kind="primary"]:hover {
     box-shadow: 0 0 28px rgba(0,255,135,0.55);
     transform: translateY(-1px);
 }
-.main .stButton > button[kind="secondary"] {
+.main .stButton > button[kind="secondary"],
+[data-testid="stMain"] .stButton > button[kind="secondary"] {
     background: #121a2e;
     border: 1px solid rgba(255,255,255,0.14);
     color: #e7ecf5;
+}
+
+/* ── Card de jogo com palpite integrado ──
+   O st.container(border=True) do dashboard vira a moldura do card;
+   o bloco e identificado pela div .card-inner via :has(). */
+[data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) {
+    background: #121a2e;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 16px;
+    padding: 0 !important;
+    overflow: hidden;
+    gap: 0.4rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+    transition: border-color 0.18s, box-shadow 0.18s;
+    animation: cardIn 0.35s ease both;
+}
+[data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)):hover {
+    border-color: rgba(0,255,135,0.45) !important;
+    box-shadow: 0 0 24px rgba(0,255,135,0.16);
+}
+[data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stHorizontalBlock"] {
+    padding: 2px 14px 14px;
+    flex-wrap: nowrap;
+}
+[data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stColumn"] {
+    min-width: 0 !important;
+}
+[data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) .pred-result {
+    padding: 0 16px 12px;
+}
+[data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stNumberInputContainer"] {
+    background: #0d1426;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
 }
 
 /* ── Hero header ── */
@@ -347,7 +386,8 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 /* ── Mobile (ate 640px) ── */
 @media (max-width: 640px) {
   .stApp { background-attachment: scroll; }
-  .main .block-container { padding: 0.8rem 0.6rem; }
+  .main .block-container,
+  [data-testid="stMainBlockContainer"] { padding: 0.8rem 0.6rem; }
   .copa-hero { padding: 16px 18px; border-radius: 14px; }
   .copa-hero-title { font-size: 21px; }
   .copa-hero-ball { font-size: 36px; }
@@ -365,6 +405,25 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
   .rank-meta { display: none; }
   .stButton > button { min-height: 44px; }
   .stNumberInput input { min-height: 44px; }
+
+  /* Palpite em linha unica dentro do card (Streamlit empilha colunas no mobile) */
+  [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stHorizontalBlock"] {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    padding: 2px 10px 12px;
+  }
+  [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stColumn"] {
+    width: auto !important;
+    flex: 4 1 0 !important;
+    min-width: 0 !important;
+  }
+  [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stColumn"]:nth-child(2) {
+    flex: 1 1 0 !important;
+  }
+  [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .match-header):not(:has(.match-card)) [data-testid="stColumn"]:nth-child(4) {
+    flex: 3 1 0 !important;
+  }
 }
 </style>
 """, unsafe_allow_html=True)
