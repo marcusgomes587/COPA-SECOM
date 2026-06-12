@@ -89,3 +89,37 @@ def load_phase():
     finally:
         session.close()
     return current_phase(matches)
+
+
+def load_user_stats(user_id, username):
+    """Loader: estatisticas pessoais do usuario para o card do dashboard."""
+    from sqlalchemy import select
+    from modules.database import get_session
+    from modules.models import Match, Prediction, User
+
+    session = get_session()
+    try:
+        users = session.execute(select(User.username, User.total_score)).all()
+        finished = session.execute(
+            select(Match)
+            .where(Match.status.in_(FINISHED))
+            .order_by(Match.kickoff_time.desc())
+        ).scalars().all()
+        preds = {
+            p.match_id: p.points_earned
+            for p in session.execute(
+                select(Prediction).where(Prediction.user_id == user_id)
+            ).scalars().all()
+        }
+    finally:
+        session.close()
+
+    positions = ranking_positions([(u, s) for u, s in users])
+    pts_finished = [preds[m.match_id] for m in finished if m.match_id in preds]
+    return {
+        "pontos": dict(users).get(username, 0),
+        "posicao": positions.get(username, 0),
+        "total_users": len(positions),
+        "aproveitamento": aproveitamento(pts_finished),
+        "sequencia": current_streak([preds.get(m.match_id) for m in finished]),
+    }

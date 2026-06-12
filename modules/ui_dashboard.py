@@ -82,6 +82,18 @@ def render_dashboard():
         st.info("Nenhum jogo cadastrado ainda.")
         return
 
+    from modules.stats import load_user_stats
+    stats = load_user_stats(st.session_state.user_id, st.session_state.username)
+    ap = f"{stats['aproveitamento']}%" if stats["aproveitamento"] is not None else "&mdash;"
+    st.markdown(f"""
+    <div class="stats-card">
+      <div class="stat-box"><div class="stat-val">{stats['pontos']}</div><div class="stat-lbl">Pontos</div></div>
+      <div class="stat-box"><div class="stat-val">{stats['posicao']}&ordm;</div><div class="stat-lbl">de {stats['total_users']}</div></div>
+      <div class="stat-box"><div class="stat-val">{ap}</div><div class="stat-lbl">Aproveitamento</div></div>
+      <div class="stat-box"><div class="stat-val">{stats['sequencia']}</div><div class="stat-lbl">Sequencia</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+
     dates = sorted({m.kickoff_time.astimezone(BRT).date() for m in matches})
     today = datetime.now(BRT).date()
     idx   = next((i for i, d in enumerate(dates) if d >= today), 0)
