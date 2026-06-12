@@ -2,6 +2,8 @@ from datetime import timedelta, timezone
 
 BRT = timezone(timedelta(hours=-3))
 FINISHED = ("FT", "AET", "PEN")
+GROUP_STAGE_MIN = 1001
+GROUP_STAGE_MAX = 1072
 
 
 def aproveitamento(points_list):
@@ -69,7 +71,7 @@ def last_finished_day(matches):
 def current_phase(matches):
     """Fase atual do torneio derivada dos jogos: 'Mata-Mata' quando toda a fase
     de grupos (match_id 1001-1072) encerrou, senao 'Fase de Grupos'."""
-    group = [m for m in matches if 1001 <= m.match_id <= 1072]
+    group = [m for m in matches if GROUP_STAGE_MIN <= m.match_id <= GROUP_STAGE_MAX]
     if group and all(m.status in FINISHED for m in group):
         return "Mata-Mata"
     return "Fase de Grupos"

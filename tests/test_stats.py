@@ -88,3 +88,58 @@ def test_craque_ninguem_pontuou_retorna_vazio():
 
 def test_craque_dict_vazio():
     assert round_top_scorers({}) == []
+
+
+# -- last_finished_day / current_phase --
+
+from collections import namedtuple
+from datetime import datetime, timezone as _tz
+
+from modules.stats import last_finished_day, current_phase
+
+FakeMatch = namedtuple("FakeMatch", "match_id status kickoff_time")
+
+
+def _utc(y, mo, d, h):
+    return datetime(y, mo, d, h, tzinfo=_tz.utc)
+
+
+def test_last_finished_day_sem_jogos_encerrados():
+    matches = [FakeMatch(1001, "NS", _utc(2026, 6, 11, 18))]
+    assert last_finished_day(matches) is None
+
+
+def test_last_finished_day_converte_para_dia_brt():
+    # 01:00 UTC do dia 12 = 22:00 BRT do dia 11
+    matches = [FakeMatch(1001, "FT", _utc(2026, 6, 12, 1))]
+    assert last_finished_day(matches) == datetime(2026, 6, 11).date()
+
+
+def test_last_finished_day_retorna_o_mais_recente():
+    matches = [
+        FakeMatch(1001, "FT", _utc(2026, 6, 11, 18)),
+        FakeMatch(1002, "AET", _utc(2026, 6, 13, 18)),
+        FakeMatch(1003, "NS", _utc(2026, 6, 15, 18)),
+    ]
+    assert last_finished_day(matches) == datetime(2026, 6, 13).date()
+
+
+def test_current_phase_grupos_em_andamento():
+    matches = [
+        FakeMatch(1001, "FT", _utc(2026, 6, 11, 18)),
+        FakeMatch(1002, "NS", _utc(2026, 6, 12, 18)),
+    ]
+    assert current_phase(matches) == "Fase de Grupos"
+
+
+def test_current_phase_mata_mata_quando_grupos_encerraram():
+    matches = [
+        FakeMatch(1001, "FT", _utc(2026, 6, 11, 18)),
+        FakeMatch(1002, "FT", _utc(2026, 6, 12, 18)),
+        FakeMatch(2001, "NS", _utc(2026, 6, 29, 18)),
+    ]
+    assert current_phase(matches) == "Mata-Mata"
+
+
+def test_current_phase_sem_jogos_cadastrados():
+    assert current_phase([]) == "Fase de Grupos"
