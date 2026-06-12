@@ -3,7 +3,7 @@ import streamlit as st
 from sqlalchemy import select
 from modules.database import get_session
 from modules.models import Match, Prediction
-from modules.flags import MATCH_GROUP
+from modules.flags import MATCH_GROUP, flag_img
 from modules.scoring import calculate_points
 
 BRT = timezone(timedelta(hours=-3))
@@ -146,7 +146,7 @@ def _render_card(m: Match, session, user_id: str):
     if m.status == "NS" and not locked:
         extra = f'<span class="countdown-pill">Fecha em {_countdown(mins)}</span>'
     elif m.status == "NS" and locked:
-        extra = '<span class="countdown-pill" style="background:#fee2e2;border-color:#fca5a5;color:#dc2626">Palpites encerrados</span>'
+        extra = '<span class="countdown-pill" style="background:rgba(255,77,109,0.10);border-color:rgba(255,77,109,0.40);color:#ff4d6d">Palpites encerrados</span>'
     else:
         extra = ""
 
@@ -159,11 +159,11 @@ def _render_card(m: Match, session, user_id: str):
       </div>
       <div class="match-body">
         <div class="team-block">
-          <span class="team-name">{m.home_team}</span>
+          {flag_img(m.home_team, 40)}<span class="team-name">{m.home_team}</span>
         </div>
         <div class="score-wrap">{score_html}</div>
         <div class="team-block away">
-          <span class="team-name">{m.away_team}</span>
+          {flag_img(m.away_team, 40)}<span class="team-name">{m.away_team}</span>
         </div>
       </div>
       {f'<div class="card-footer">{saved_badge}{" &nbsp; " if saved_badge and extra else ""}{extra}</div>' if saved_badge or extra else ""}

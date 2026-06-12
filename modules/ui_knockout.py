@@ -3,6 +3,7 @@ from sqlalchemy import select
 from modules.database import get_session
 from modules.models import Match
 from modules.scoring import calculate_points
+from modules.flags import flag_img
 
 
 ROUNDS = [
@@ -44,11 +45,11 @@ def _render_knockout_card(match: Match, user_id: str, session):
       </div>
       <div class="match-body">
         <div class="team-block">
-          <span class="team-name">{match.home_team}</span>
+          {flag_img(match.home_team, 40)}<span class="team-name">{match.home_team}</span>
         </div>
         <div class="score-wrap">{score_html}</div>
         <div class="team-block away">
-          <span class="team-name">{match.away_team}</span>
+          {flag_img(match.away_team, 40)}<span class="team-name">{match.away_team}</span>
         </div>
       </div>
     </div>
