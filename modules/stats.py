@@ -123,3 +123,66 @@ def load_user_stats(user_id, username):
         "aproveitamento": aproveitamento(pts_finished),
         "sequencia": current_streak([preds.get(m.match_id) for m in finished]),
     }
+
+
+def load_ranking_data():
+    """Loader: linhas do ranking com movimento de posicao e craque da rodada.
+
+    'Ultima rodada' = ultimo dia-calendario BRT com pelo menos um jogo encerrado.
+    Posicao anterior = ranking recalculado subtraindo os pontos desse dia
+    (derivavel porque total_score e a soma de points_earned).
+    """
+    from sqlalchemy import select
+    from modules.database import get_session
+    from modules.models import Match, Prediction, User
+
+    session = get_session()
+    try:
+        users = session.execute(
+            select(User).order_by(User.total_score.desc())
+        ).scalars().all()
+        finished = session.execute(
+            select(Match).where(Match.status.in_(FINISHED))
+        ).scalars().all()
+        preds = session.execute(select(Prediction)).scalars().all()
+        user_rows = [(u.id, u.username, u.total_score) for u in users]
+        finished_rows = [(m.match_id, m.kickoff_time) for m in finished]
+        pred_rows = [(p.user_id, p.match_id, p.points_earned) for p in preds]
+    finally:
+        session.close()
+
+    # Compute last day directly from materialized kickoff times
+    days = [k.astimezone(BRT).date() for _, k in finished_rows]
+    last_day = max(days) if days else None
+    last_ids = {
+        mid for mid, k in finished_rows
+        if last_day and k.astimezone(BRT).date() == last_day
+    }
+
+    rows = []
+    last_round_pts = {}
+    for uid, name, score in user_rows:
+        user_preds = [(mid, pts) for u, mid, pts in pred_rows if u == uid]
+        last_pts = sum(
+            pts for u, mid, pts in pred_rows if u == uid and mid in last_ids
+        )
+        last_round_pts[name] = last_pts
+        rows.append({
+            "name": name,
+            "pts": score,
+            "total": len(user_preds),
+            "exact": sum(1 for _, pts in user_preds if pts == 5),
+            "last_pts": last_pts,
+        })
+
+    current = ranking_positions([(r["name"], r["pts"]) for r in rows])
+    previous = ranking_positions([(r["name"], r["pts"] - r["last_pts"]) for r in rows])
+    mov = movement(current, previous)
+    craques = round_top_scorers(last_round_pts)
+
+    rows.sort(key=lambda r: r["pts"], reverse=True)
+    for i, r in enumerate(rows, 1):
+        r["pos"] = i
+        r["mov"] = mov[r["name"]] if last_day else "same"
+        r["craque"] = r["name"] in craques
+    return rows
