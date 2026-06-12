@@ -39,6 +39,18 @@ def render_admin():
         st.warning("Nenhum jogo cadastrado.")
         return
 
+    from modules.stats import FINISHED, GROUP_STAGE_MIN, GROUP_STAGE_MAX
+
+    group = [m for m in all_matches if GROUP_STAGE_MIN <= m.match_id <= GROUP_STAGE_MAX]
+    done = sum(1 for m in group if m.status in FINISHED)
+    if group:
+        st.progress(done / len(group))
+        st.caption(f"{done} de {len(group)} jogos da fase de grupos com placar lancado")
+    knockout_all = [m for m in all_matches if m.match_id >= 2000]
+    if knockout_all:
+        ko_done = sum(1 for m in knockout_all if m.status in FINISHED)
+        st.caption(f"Mata-mata: {ko_done} de {len(knockout_all)} jogos encerrados")
+
     match_map = {m.match_id: m for m in all_matches}
 
     tab_labels = list(ROUNDS.keys()) + ["Mata-Mata"]
@@ -69,13 +81,16 @@ def _render_round(matches: list):
         BRT = timezone(timedelta(hours=-3))
         kickoff_brt = m.kickoff_time.astimezone(BRT).strftime("%d/%m %H:%M")
 
-        status_icon = {"FT": "✅", "AET": "✅", "NS": "🕐",
-                       "1H": "🔴", "2H": "🔴", "HT": "🟡"}.get(m.status, "🕐")
+        status_dot = {
+            "FT": ":green[&#9679;]", "AET": ":green[&#9679;]", "PEN": ":green[&#9679;]",
+            "1H": ":red[&#9679;]", "2H": ":red[&#9679;]", "ET": ":red[&#9679;]",
+            "HT": ":orange[&#9679;]",
+        }.get(m.status, ":gray[&#9679;]")
 
         score_str = f"{m.home_score} x {m.away_score}" if m.home_score is not None else "- x -"
 
         with st.expander(
-            f"{status_icon} {group_label}{m.home_team} vs {m.away_team}  "
+            f"{status_dot} {group_label}{m.home_team} vs {m.away_team}  "
             f"·  {kickoff_brt}  ·  {score_str}"
         ):
             with st.form(key=f"admin_{m.match_id}"):
