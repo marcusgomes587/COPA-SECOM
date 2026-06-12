@@ -82,10 +82,10 @@ def _render_round(matches: list):
         kickoff_brt = m.kickoff_time.astimezone(BRT).strftime("%d/%m %H:%M")
 
         status_dot = {
-            "FT": ":green[&#9679;]", "AET": ":green[&#9679;]", "PEN": ":green[&#9679;]",
-            "1H": ":red[&#9679;]", "2H": ":red[&#9679;]", "ET": ":red[&#9679;]",
-            "HT": ":orange[&#9679;]",
-        }.get(m.status, ":gray[&#9679;]")
+            "FT": ":green[●]", "AET": ":green[●]", "PEN": ":green[●]",
+            "1H": ":red[●]", "2H": ":red[●]", "ET": ":red[●]",
+            "HT": ":orange[●]",
+        }.get(m.status, ":gray[●]")
 
         score_str = f"{m.home_score} x {m.away_score}" if m.home_score is not None else "- x -"
 
