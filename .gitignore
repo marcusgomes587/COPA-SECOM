@@ -6,3 +6,4 @@ __pycache__/
 .DS_Store
 secrets_cloud.toml
 .pytest_cache/
+verification_screenshots/
