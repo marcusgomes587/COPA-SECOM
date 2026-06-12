@@ -1,9 +1,12 @@
 from datetime import timedelta, timezone
+from collections import namedtuple
 
 BRT = timezone(timedelta(hours=-3))
 FINISHED = ("FT", "AET", "PEN")
 GROUP_STAGE_MIN = 1001
 GROUP_STAGE_MAX = 1072
+
+FinishedMatch = namedtuple("FinishedMatch", "match_id status kickoff_time")
 
 
 def aproveitamento(points_list):
@@ -146,17 +149,16 @@ def load_ranking_data():
         ).scalars().all()
         preds = session.execute(select(Prediction)).scalars().all()
         user_rows = [(u.id, u.username, u.total_score) for u in users]
-        finished_rows = [(m.match_id, m.kickoff_time) for m in finished]
+        finished_rows = [FinishedMatch(m.match_id, m.status, m.kickoff_time) for m in finished]
         pred_rows = [(p.user_id, p.match_id, p.points_earned) for p in preds]
     finally:
         session.close()
 
-    # Compute last day directly from materialized kickoff times
-    days = [k.astimezone(BRT).date() for _, k in finished_rows]
-    last_day = max(days) if days else None
+    # Delegate last_day computation to tested pure function
+    last_day = last_finished_day(finished_rows)
     last_ids = {
-        mid for mid, k in finished_rows
-        if last_day and k.astimezone(BRT).date() == last_day
+        m.match_id for m in finished_rows
+        if last_day and m.kickoff_time.astimezone(BRT).date() == last_day
     }
 
     rows = []
