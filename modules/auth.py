@@ -1,3 +1,6 @@
+import secrets
+import uuid
+
 import bcrypt
 import streamlit as st
 from sqlalchemy import select
@@ -71,3 +74,58 @@ def require_login():
     if not st.session_state.get("logged_in"):
         st.warning("Faca login para continuar.")
         st.stop()
+
+
+TEMP_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
+
+
+def generate_temp_password() -> str:
+    """Senha temporaria legivel, sem caracteres ambiguos (0/O, 1/l/i)."""
+    return "copa-" + "".join(secrets.choice(TEMP_ALPHABET) for _ in range(4))
+
+
+def validate_new_password(new: str, confirm: str) -> str | None:
+    """Retorna mensagem de erro ou None se a nova senha e valida."""
+    if len(new) < 6:
+        return "Senha deve ter pelo menos 6 caracteres."
+    if new != confirm:
+        return "As senhas nao coincidem."
+    return None
+
+
+def change_password(user_id: str, current_password: str, new_password: str) -> tuple[bool, str]:
+    session = get_session()
+    try:
+        user = session.get(User, uuid.UUID(user_id))
+        if not user:
+            return False, "Usuario nao encontrado."
+        if not verify_password(current_password, user.password_hash):
+            return False, "Senha atual incorreta."
+        user.password_hash = hash_password(new_password)
+        session.commit()
+        return True, "Senha alterada com sucesso!"
+    except Exception as e:
+        session.rollback()
+        return False, f"Erro ao alterar senha: {str(e)}"
+    finally:
+        session.close()
+
+
+def admin_reset_password(username: str) -> tuple[bool, str]:
+    """Gera senha temporaria para o usuario. Retorna (True, senha_em_claro) ou (False, erro)."""
+    temp = generate_temp_password()
+    session = get_session()
+    try:
+        user = session.execute(
+            select(User).where(User.username == username)
+        ).scalar_one_or_none()
+        if not user:
+            return False, "Usuario nao encontrado."
+        user.password_hash = hash_password(temp)
+        session.commit()
+        return True, temp
+    except Exception as e:
+        session.rollback()
+        return False, f"Erro ao redefinir senha: {str(e)}"
+    finally:
+        session.close()
