@@ -1,7 +1,7 @@
 import streamlit as st
 from sqlalchemy import select
 from modules.database import get_session
-from modules.models import Match
+from modules.models import Match, User
 from modules.scoring import update_scores_for_match, recalculate_all_finished
 from modules.flags import MATCH_GROUP
 
@@ -17,6 +17,26 @@ ROUNDS = {
 def render_admin():
     st.header("Painel Admin — Placares")
     st.caption("Visivel apenas para o administrador.")
+
+    with st.expander("Usuarios — redefinir senha"):
+        st.caption("Para quem esqueceu a senha: gere uma temporaria e repasse. A pessoa troca depois em 'Minha Conta'.")
+        session = get_session()
+        usernames = [u for (u,) in session.execute(
+            select(User.username).order_by(User.username)
+        ).all()]
+        session.close()
+        if not usernames:
+            st.info("Nenhum usuario cadastrado.")
+        else:
+            sel = st.selectbox("Usuario", usernames, key="reset_pw_user")
+            if st.button("Gerar senha temporaria", key="btn_reset_pw", type="primary"):
+                from modules.auth import admin_reset_password
+                ok, result = admin_reset_password(sel)
+                if ok:
+                    st.success("Senha temporaria gerada — copie agora, ela nao sera mostrada de novo:")
+                    st.code(result)
+                else:
+                    st.error(result)
 
     st.divider()
     st.markdown("**Recalcular todos os pontos**")
