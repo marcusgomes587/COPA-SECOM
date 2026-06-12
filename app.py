@@ -315,6 +315,7 @@ with st.sidebar:
         ("Palpites", "Meus Palpites"),
         ("Ranking",  "Ranking"),
         ("Especiais","Apostas Especiais"),
+        ("Conta",    "Minha Conta"),
     ]
     for key, label in nav_items:
         active = st.session_state.page == key
@@ -374,6 +375,9 @@ elif page == "Ranking":
 elif page == "Especiais":
     from modules.ui_special_bets import render_special_bets
     render_special_bets()
+elif page == "Conta":
+    from modules.ui_account import render_account
+    render_account()
 elif page == "Admin":
     from modules.ui_admin import render_admin
     render_admin()
