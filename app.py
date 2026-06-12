@@ -336,7 +336,17 @@ render_sidebar_monitor()
 
 # Hero header
 from modules.stats import load_phase
-phase = load_phase()
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _cached_phase():
+    try:
+        return load_phase()
+    except Exception:
+        return "Fase de Grupos"
+
+
+phase = _cached_phase()
 st.markdown(f"""
 <div class="copa-hero">
   <div>
